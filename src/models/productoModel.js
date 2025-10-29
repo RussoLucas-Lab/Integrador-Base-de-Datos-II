@@ -7,7 +7,7 @@ const productoSchema = new mongoose.Schema({
   stock: { type: Number, required: true, min: 0 },
   categoria: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Categoria", // relación con Categoría
+    ref: "Categoria",
     required: true
   },
   reseñas: [

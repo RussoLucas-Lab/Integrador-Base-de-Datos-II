@@ -8,7 +8,7 @@ const resenaSchema = new mongoose.Schema({
   },
   producto: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Producto", // referencia al producto reseñado
+    ref: "Producto", 
     required: true,
   },
   calificacion: {

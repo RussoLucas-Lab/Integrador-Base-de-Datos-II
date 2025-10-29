@@ -14,36 +14,32 @@ const validateToken = (req, res, next) => {
   next();
 };
 
-
 //CRUD
 //CREATE
 usuarioRoutes.post("/crearUsuario", async (req, res) => {
-  const { nombre, email, contrasena, rol, direccion, telefono } = req.body;
+  try {
+    const { nombre, email, contrasena, rol, direccion, telefono } = req.body;
 
-  if (
-    !nombre ||
-    !email ||
-    !contrasena ||
-    !rol ||
-    !direccion ||
-    !telefono
-  ) {
-    return res
-      .status(400)
-      .json({ message: "alguno de los parametros esta faltante" });
+    if (!nombre || !email || !contrasena || !rol || !direccion || !telefono) {
+      return res
+        .status(400)
+        .json({ message: "alguno de los parametros esta faltante" });
+    }
+    const password = await encriptPass(contrasena);
+    const user = new Usuario({
+      nombre,
+      email,
+      contrasena: password,
+      rol,
+      direccion,
+      telefono,
+    });
+    const newUser = await user.save();
+    const token = generateToken(newUser);
+    return res.status(201).json({ newUser, token });
+  } catch (e) {
+    res.status(500).json({ message: `Error en la peticion: ${e}` });
   }
-  const password = await encriptPass(contrasena);
-  const user = new Usuario({
-    nombre,
-    email,
-    contrasena: password,
-    rol,
-    direccion,
-    telefono,
-  });
-  const newUser = await user.save();
-  const token = generateToken(newUser);
-  return res.status(201).json({ newUser, token });
 });
 
 //READ
@@ -101,13 +97,13 @@ usuarioRoutes.delete("/eliminarUsuario/:id", async (req, res) => {
 });
 
 //LOGIN
-usuarioRoutes.post("/login", async (req,res) => {
-    const { email, contrasena} = req.body
-    if(!email || !contrasena){
-        return res.status(400).json({message:'Email o contraseña faltante'})
-    }
-    const user = await Usuario.findOne({email})
-    const validPass = await validatePass(contrasena,user.contrasena)
-    const token = generateToken(user)
-    return res.status(201).json({user, token})
-})
+usuarioRoutes.post("/login", async (req, res) => {
+  const { email, contrasena } = req.body;
+  if (!email || !contrasena) {
+    return res.status(400).json({ message: "Email o contraseña faltante" });
+  }
+  const user = await Usuario.findOne({ email });
+  const validPass = await validatePass(contrasena, user.contrasena);
+  const token = generateToken(user);
+  return res.status(201).json({ user, token });
+});

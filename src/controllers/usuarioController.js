@@ -1,8 +1,5 @@
 import { Usuario } from "../models/usuarioModel.js";
 import { encriptPass, validatePass } from "../services/password.service.js";
-import express from "express"
-
-export const usuarioRoutes = express.Router();
 
 //CREATE
 export const createUsuario = async (req, res) => {

@@ -19,11 +19,9 @@ const validateToken = (req, res, next) => {
   next();
 };
 
-//CRUD
-usuarioRoutes.post("/crearUsuario", createUsuario);
-usuarioRoutes.get("/listarUsuarios", validateToken, readUsuario);
-usuarioRoutes.put("/actualizarUsuario/:id", validateToken, updateUsuario);
-usuarioRoutes.delete("/eliminarUsuario/:id", deleteUsuario);
-
-//LOGIN
-usuarioRoutes.post("/login", login);
+usuarioRoutes
+  .post("/crear", createUsuario)
+  .get("/listar", validateToken, readUsuario)
+  .put("/actualizar/:id", validateToken, updateUsuario)
+  .delete("/eliminar/:id", deleteUsuario)
+  .post("/login", login);

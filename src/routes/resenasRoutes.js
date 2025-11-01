@@ -1,15 +1,23 @@
-import express from 'express';
-import * as resenaController from '../controllers/resenaController.js'; 
+import express from "express";
+import {
+  crearResena,
+  listarResenasPorProducto,
+  obtenerResena,
+  actualizarResena,
+  eliminarResena,
+  promedioCalificacionesPorProducto
+} from "../controllers/resenasControler.js";
 
-const router = express.Router();
+export const resenaRoutes = express.Router();
 
-router.route('/productos/:productoId/resenas')
-    .post(resenaController.crearResena)
-    .get(resenaController.listarResenasPorProducto);
+resenaRoutes
+  .route("/productos/:productoId")
+  .post(crearResena) //ENVIAR EL USUARIO EN EL BODY DEL REQUEST {"usuario": "userId"}
+  .get(listarResenasPorProducto);
 
-router.route('/resenas/:id')
-    .get(resenaController.obtenerResena)
-    .put(resenaController.actualizarResena)
-    .delete(resenaController.eliminarResena);
-
-export default router;
+resenaRoutes
+  .route("/:id")
+  .get(obtenerResena)
+  .put(actualizarResena)
+  .delete(eliminarResena);
+resenaRoutes.route("/top").get(promedioCalificacionesPorProducto)

@@ -95,3 +95,37 @@ export const eliminarPedido = async (req, res) => {
         return res.status(500).json({ error: 'Error al eliminar pedido', details: err.message });
     }
 }
+
+//Actualizar estado del pedido
+export const actualizarEstadoPedido = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { estado } = req.body;
+
+        if (!estado) {
+            return res.status(400).json({ error: "Debe indicar un estado válido" });
+        }
+
+        const pedidoActualizado = await Pedido.findByIdAndUpdate(
+            id,
+            { estado },
+            { new: true, runValidators: true }
+        )
+        .populate('usuario', 'nombre email')
+        .populate('items.producto', 'nombre precio');
+
+        if (!pedidoActualizado) {
+            return res.status(404).json({ error: "Pedido no encontrado" });
+        }
+
+        return res.status(200).json(pedidoActualizado);
+    } catch (err) {
+        if (err.name === 'CastError') {
+            return res.status(400).json({ error: "ID de pedido no válido", details: err.message });
+        }
+        if (err.name === 'ValidationError') {
+            return res.status(400).json({ error: "Estado inválido", details: err.message });
+        }
+        return res.status(500).json({ error: "Error al actualizar estado del pedido", details: err.message });
+    }
+};

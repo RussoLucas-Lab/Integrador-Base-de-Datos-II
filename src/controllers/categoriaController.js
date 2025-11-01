@@ -77,3 +77,29 @@ export const eliminarCategoria = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+//Prdouctos por caterogria
+export const contarProductosPorCategoria = async (req, res) => {
+  try {
+    const resultado = await Categoria.aggregate([
+      {
+        $lookup: {
+          from: "productos",
+          localField: "_id",
+          foreignField: "categoria",
+          as: "productos"
+        }
+      },
+      {
+        $project: {
+          nombre: 1,
+          cantidadProductos: { $size: "$productos" }
+        }
+      }
+    ]);
+
+    res.status(200).json(resultado);
+  } catch (error) {
+    res.status(500).json({ message: "Error al contar productos por categoría", details: error.message });
+  }
+};

@@ -4,15 +4,23 @@ import {
   listarCategorias,
   obtenerCategoriaPorId,
   actualizarCategoria,
-  eliminarCategoria
+  eliminarCategoria,
+  contarProductosPorCategoria
 } from "../controllers/categoriaController.js";
 
 export const categoriaRoutes = express.Router();
 
-categoriaRoutes.post("/crear", crearCategoria);
-categoriaRoutes.get("/listar", listarCategorias);
-categoriaRoutes.get("/listarPorId/:id", obtenerCategoriaPorId);
-categoriaRoutes.put("/actualizar/:id", actualizarCategoria);
-categoriaRoutes.delete("/eliminar/:id", eliminarCategoria);
+categoriaRoutes
+  .route("/")  
+  .post(crearCategoria)
+  .get(listarCategorias);
 
+categoriaRoutes
+  .route("/:id")
+  .get(obtenerCategoriaPorId)
+  .put(actualizarCategoria)
+  .delete(eliminarCategoria);
 
+  categoriaRoutes
+  .route("/stats")
+  .get(contarProductosPorCategoria)

@@ -108,3 +108,38 @@ export const vaciarCarrito = async (req, res) => {
         return res.status(500).json({ error: 'Error al vaciar el carrito', details: err.message });
     }
 }
+
+//Calcular total y subtotal
+export const calcularTotalCarrito = async (req, res) => {
+    try {
+        const userId = req.params.userId || req.userId;
+
+        const carrito = await Carrito.findOne({ usuario: userId })
+            .populate("items.producto", "nombre precio");
+
+        if (!carrito) {
+            return res.status(404).json({ error: "Carrito no encontrado" });
+        }
+
+        let total = 0;
+        const itemsConSubtotal = carrito.items.map(item => {
+            const subtotal = item.cantidad * item.producto.precio;
+            total += subtotal;
+            return {
+                producto: item.producto.nombre,
+                cantidad: item.cantidad,
+                precioUnitario: item.producto.precio,
+                subtotal
+            };
+        });
+
+        return res.status(200).json({
+            usuario: userId,
+            items: itemsConSubtotal,
+            total
+        });
+
+    } catch (err) {
+        return res.status(500).json({ error: "Error al calcular total del carrito", details: err.message });
+    }
+};

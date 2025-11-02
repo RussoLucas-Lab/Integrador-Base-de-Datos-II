@@ -6,15 +6,17 @@ import {
   vaciarCarrito,
   calcularTotalCarrito,
 } from "../controllers/carritoController.js";
+import { validateToken } from "../services/auth.service.js";
 
 export const carritoRoutes = express.Router();
 
+carritoRoutes.route("/vaciar/:userId").delete(validateToken, vaciarCarrito);
+
 carritoRoutes
   .route("/:userId")
-  .get(obtenerCarrito)
-  .post(agregarOActualizarItem);
+  .get(validateToken, obtenerCarrito)
+  .post(validateToken, agregarOActualizarItem);
 
-carritoRoutes.route("/:userId/:productoId").delete(eliminarItem);
+carritoRoutes.route("/:userId/:productoId").delete(validateToken, eliminarItem);
 
-carritoRoutes.route("/vaciar/:userId").delete(vaciarCarrito);
-carritoRoutes.route("/:userId/total").get(calcularTotalCarrito);
+carritoRoutes.route("/:userId/total").get(validateToken, calcularTotalCarrito);

@@ -12,9 +12,10 @@ dotenv.config();
 
 const PORT = process.env.PORT || 5000;
 const MONGO_URL = process.env.MONGO_URL;
+const DB_NAME = process.env.DB_NAME;
 app.use(express.json());
 mongoose
-  .connect(MONGO_URL)
+  .connect(`${MONGO_URL}${DB_NAME}`)
   .then(() => {
     console.log("Conexión exitosa a la base de datos");
   })

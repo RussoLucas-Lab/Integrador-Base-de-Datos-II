@@ -6,7 +6,6 @@ export const crearResena = async (req, res) => {
    try {
         const { usuario, producto, calificacion, comentario } = req.body;
 
-        //Verificar que el usuario haya comprado el producto
         const pedidos = await Pedido.find({
             usuario: usuario,
             "items.producto": producto
@@ -17,7 +16,10 @@ export const crearResena = async (req, res) => {
                 error: "No puedes reseñar un producto que no has comprado"
             });
         }
+
+     
         const nuevaResena = await Resena.create({ usuario, producto, calificacion, comentario });
+        await Producto.findByIdAndUpdate(producto, { $push: { reseñas: nuevaResena._id } });
 
         res.status(201).json(nuevaResena);
 

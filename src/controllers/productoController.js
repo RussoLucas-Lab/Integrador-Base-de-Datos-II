@@ -1,5 +1,5 @@
 import { Producto } from "../models/productoModel.js";
-
+import { Categoria } from "../models/categoriaModel.js";
 // Listar todos los productos
 export const listarProductos = async (req, res) => {
   try {
@@ -31,6 +31,17 @@ export const obtenerProducto = async (req, res) => {
 export const crearProducto = async (req, res) => {
   try {
     const productoGuardado = await Producto.create(req.body);
+
+
+    if (req.body.categoria) {
+      const categoria = await Categoria.findById(req.body.categoria);
+      if (categoria) {
+        categoria.productos = categoria.productos || [];
+        categoria.productos.push(productoGuardado._id);
+        await categoria.save();
+      }
+    }
+
     return res.status(201).json(productoGuardado);
   } catch (err) {
     if (err.name === "ValidationError") {
@@ -108,20 +119,17 @@ export const eliminarProducto = async (req, res) => {
   }
 };
 
-//Buscar por rango de precio y marca
+//Buscar por rango de precio
 export const listarPorPrecioYMarca = async (req, res) => {
   try {
-    const { precioMin, precioMax, marca } = req.query;
+     const { min, max, marca } = req.params; 
     const filtro = {};
 
-    if (precioMin || precioMax) {
+    // Filtrar por rango de precio
+    if (min || max) {
       filtro.precio = {};
-      if (precioMin) filtro.precio.$gte = Number(precioMin);
-      if (precioMax) filtro.precio.$lte = Number(precioMax);
-    }
-
-    if (marca) {
-      filtro.marca = marca;
+      if (min) filtro.precio.$gte = Number(min);
+      if (max) filtro.precio.$lte = Number(max);
     }
 
     const productos = await Producto.find(filtro);
@@ -136,19 +144,32 @@ export const listarPorPrecioYMarca = async (req, res) => {
 
 //Producto mas resenado
 
-export const productoMasReseñado = async (req, res) => {
+export const productoMasResenado = async (req, res) => {
   try {
     const resultado = await Producto.aggregate([
+      {
+        $lookup: {
+          from: "resenas",
+          localField: "_id",
+          foreignField: "producto",
+          as: "reseñas"
+        }
+      },
+      {
+        $addFields: {
+          cantidadResenas: { $size: "$reseñas" }
+        }
+      },
+      { $sort: { cantidadResenas: -1 } },
+      { $limit: 1 },
       {
         $project: {
           nombre: 1,
           descripcion: 1,
           precio: 1,
-          cantidadResenas: { $size: "$reseñas" } 
+          cantidadResenas: 1
         }
-      },
-      { $sort: { cantidadResenas: -1 } },
-      { $limit: 1 } 
+      }
     ]);
 
     if (!resultado.length) {
@@ -160,4 +181,3 @@ export const productoMasReseñado = async (req, res) => {
     res.status(500).json({ message: "Error al obtener el producto más reseñado", details: err.message });
   }
 };
-

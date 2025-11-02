@@ -14,4 +14,4 @@ const userSchema = mongoose.Schema({
     telefono: { type: String, require: true },
 });
 
-export const Usuario = mongoose.model("Usuario", userSchema);
+export const Usuario = mongoose.model("Usuario", userSchema, "usuarios");

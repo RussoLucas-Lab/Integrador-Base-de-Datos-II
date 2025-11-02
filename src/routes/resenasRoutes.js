@@ -7,17 +7,20 @@ import {
   eliminarResena,
   promedioCalificacionesPorProducto
 } from "../controllers/resenasControler.js";
+import { validateToken, requireAdmin } from "../services/auth.service.js";
 
 export const resenaRoutes = express.Router();
 
+resenaRoutes.route("/top")
+  .get(promedioCalificacionesPorProducto)
+
 resenaRoutes
   .route("/productos/:productoId")
-  .post(crearResena) //ENVIAR EL USUARIO EN EL BODY DEL REQUEST {"usuario": "userId"}
+  .post(validateToken, crearResena) //ENVIAR EL USUARIO EN EL BODY DEL REQUEST {"usuario": "userId"}
   .get(listarResenasPorProducto);
 
 resenaRoutes
   .route("/:id")
   .get(obtenerResena)
-  .put(actualizarResena)
-  .delete(eliminarResena);
-resenaRoutes.route("/top").get(promedioCalificacionesPorProducto)
+  .put(validateToken, requireAdmin, actualizarResena)
+  .delete(validateToken, requireAdmin, eliminarResena);

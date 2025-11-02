@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const resenaSchema = new mongoose.Schema({
     usuario: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User", // referencia al  usuario
+        ref: "Usuario", // referencia al  usuario
         required: true,
     },
     producto: {

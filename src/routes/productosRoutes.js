@@ -7,19 +7,25 @@ import {
   actualizarStock,
   eliminarProducto,
   listarPorPrecioYMarca,
-  productoMasReseñado
+  productoMasResenado,
 } from "../controllers/productoController.js";
+import { validateToken, requireAdmin } from "../services/auth.service.js";
 
 export const productoRoutes = express.Router();
 
-productoRoutes.route("/").get(listarProductos).post(crearProducto);
+productoRoutes.route("/top").get(productoMasResenado);
+
+productoRoutes.route("/")
+.get(listarProductos)
+.post(validateToken,requireAdmin,crearProducto);
+
+
+productoRoutes.route("/stock/:id")
+  .put(validateToken, requireAdmin, actualizarStock)
+productoRoutes.route("/filtro/:min/:max").get(listarPorPrecioYMarca);
 
 productoRoutes
   .route("/:id")
-  .get(obtenerProducto)
-  .put(actualizarProducto)
-  .put(actualizarStock)
-  .delete(eliminarProducto);
-
-productoRoutes.route("/filtro/:min/:max/:marca").get(listarPorPrecioYMarca);
-productoRoutes.route("/top").get(productoMasReseñado)
+  .get(validateToken, requireAdmin, obtenerProducto)
+  .put(validateToken, requireAdmin, actualizarProducto)
+  .delete(validateToken, requireAdmin ,eliminarProducto);

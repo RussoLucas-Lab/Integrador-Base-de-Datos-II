@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const carritoSchema = new mongoose.Schema({
     usuario: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
+        ref: "Usuario",
         required: true,
         unique: true
     },

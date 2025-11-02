@@ -1,5 +1,7 @@
 import { Usuario } from "../models/usuarioModel.js";
+import { Carrito } from "../models/carritoModel.js";
 import { encriptPass, validatePass } from "../services/password.service.js";
+import { generateToken } from "../services/auth.service.js";
 
 //CREATE
 export const createUsuario = async (req, res) => {
@@ -12,6 +14,14 @@ export const createUsuario = async (req, res) => {
         details: err.message,
       });
     }
+    
+    const existingUser = await Usuario.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({
+        message: "El email ya está registrado",
+      });
+    }
+
     const password = await encriptPass(contrasena);
     const user = new Usuario({
       nombre,
@@ -47,11 +57,10 @@ export const updateUsuario = async (req, res) => {
   try {
     const { nombre, email, direccion, telefono } = req.body;
     const { id } = req.params;
-    const usrUpdate = await User.findByIdAndUpdate(
+    const usrUpdate = await Usuario.findByIdAndUpdate(
       id,
       {
         nombre,
-        edad,
         email,
         direccion,
         telefono,
@@ -80,30 +89,55 @@ export const deleteUsuario = async (req, res) => {
         .json({ message: `El usuario con id ${id} no fue encontrado` });
     }
     await Carrito.findOneAndDelete({ usuario: id });
-    
-    return res
-      .status(200)
-      .json({
-        message: `El usuario con id ${id} y su carrito fueron eliminados correctamente`,
-      });
+
+    return res.status(200).json({
+      message: `El usuario con id ${id} y su carrito fueron eliminados correctamente`,
+    });
   } catch (error) {
-    return res
-      .status(500)
-      .json({
-        message: "Error al eliminar el usuario",
-        details: error.message,
-      });
+    return res.status(500).json({
+      message: "Error al eliminar el usuario",
+      details: error.message,
+    });
   }
 };
 
 //LOGIN
 export const login = async (req, res) => {
-  const { email, contrasena } = req.body;
-  if (!email || !contrasena) {
-    return res.status(400).json({ message: "Email o contraseña faltante" });
+  try {
+    const { email, contrasena } = req.body;
+
+    if (!email || !contrasena) {
+      return res.status(400).json({ message: "Email o contraseña faltante" });
+    }
+
+    const user = await Usuario.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    const validPass = await validatePass(contrasena, user.contrasena);
+    if (!validPass) {
+      return res.status(401).json({ message: "Contraseña incorrecta" });
+    }
+
+    const token = generateToken({
+      id: user._id,
+      email: user.email,
+      rol: user.rol,
+    });
+
+    return res.status(200).json({
+      message: "Inicio de sesión exitoso",
+      token,
+      user: {
+        id: user._id,
+        nombre: user.nombre,
+        email: user.email,
+        rol: user.rol,
+      },
+    });
+  } catch (error) {
+    console.error("Error en login:", error);
+    return res.status(500).json({ message: "Error interno del servidor" });
   }
-  const user = await Usuario.findOne({ email });
-  const validPass = await validatePass(contrasena, user.contrasena);
-  const token = generateToken(user);
-  return res.status(201).json({ user, token });
 };

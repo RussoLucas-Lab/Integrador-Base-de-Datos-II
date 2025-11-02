@@ -1,5 +1,3 @@
-
-
 import jwt from "jsonwebtoken";
 
 const secret = process.env.JWT_SECRET || "default-secret";
@@ -16,7 +14,7 @@ export const validateToken = (req, res, next) => {
 
   jwt.verify(token, secret, (err, decoded) => {
     if (err) return res.status(403).json({ message: "Token inválido" });
-    req.user = decoded; // aquí guardamos id y rol
+    req.user = decoded; //id y rol
     next();
   });
 };
@@ -26,15 +24,4 @@ export const requireAdmin = (req, res, next) => {
   if (req.user.rol !== "administrador")
     return res.status(403).json({ message: "Se requiere rol de administrador" });
   next();
-};
-
-// Middleware para dueño o admin
-export const requireOwnerOrAdmin = (paramUserIdField) => {
-  return (req, res, next) => {
-    const userId = req.params[paramUserIdField];
-    if (req.user.id !== userId && req.user.rol !== "administrador") {
-      return res.status(403).json({ message: "No autorizado" });
-    }
-    next();
-  };
 };
